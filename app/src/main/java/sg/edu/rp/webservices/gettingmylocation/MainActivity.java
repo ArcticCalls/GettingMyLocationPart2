@@ -7,13 +7,16 @@ import androidx.core.content.PermissionChecker;
 import androidx.fragment.app.FragmentManager;
 
 import android.Manifest;
+import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -34,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
     GoogleMap map;
     Button btnGetLocation, btnRemoveLocation, btnRecords;
+    ToggleButton btnMusic;
     TextView tv;
     FusedLocationProviderClient client;
     LocationCallback mLocationCallback;
@@ -50,6 +54,15 @@ public class MainActivity extends AppCompatActivity {
         SupportMapFragment mapFragment = (SupportMapFragment) fm.findFragmentById(R.id.map);
         btnRecords = findViewById(R.id.btnRecords);
         tv = findViewById(R.id.tvLastKnownLocation);
+        btnMusic = findViewById(R.id.btnMusic);
+
+        int permissionCheck = PermissionChecker.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if(permissionCheck != PermissionChecker.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
+            Log.i("permission", "Permission not granted");
+            return;
+        }
+
         client = LocationServices.getFusedLocationProviderClient(MainActivity.this);
         mLocationCallback = new LocationCallback() {
             @Override
@@ -112,6 +125,17 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+       btnMusic.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+           @Override
+           public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+               if(b){
+                   startService(new Intent(MainActivity.this, MyService.class));
+               }else{
+                   stopService(new Intent(MainActivity.this, MyService.class));
+               }
+           }
+       });
 
     }
 
